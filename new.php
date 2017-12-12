@@ -32,7 +32,6 @@ $route=set_routes($length);
 		
 	function chr_len($chr){
 		$route=0;
-
 		for ($i=0; $i < count($chr)-1 ; $i++) { 
 			if ($chr[$i]<$chr[$i+1]){
 				$route+=$GLOBALS['route'][$chr[$i]][$chr[$i+1]];	
@@ -48,7 +47,7 @@ $route=set_routes($length);
 
 	function crossingover($chr1,$chr2,$length){
 		$count=round($length/2);
-		$count=$count+round($count/2);
+		//$count=$count+round($count/2);
 		$child1=array();
 		$child2=array();
 		for ($i=0; $i <$count ; $i++) { 
@@ -67,42 +66,59 @@ $route=set_routes($length);
 		}
 	}
 
-	
-	crossingover(chromosome($length),chromosome($length),$length);
+	function mutation($chr,$length){
+		$j=rand(0,$length-1);
+		$i=rand(0,$length-1);
+		$buf=$chr[$i];
+		$chr[$i]=$chr[$j];
+		$chr[$j]=$buf;
+		return $chr;
+	}	
+
 	$population=array();
 	$child=array();
-	for ($i=0; $i <70000 ; $i++) { 
-		$population[]=chromosome($length);
-	}
-	for ($i=0; $i <5 ; $i++) { 
-		echo "<b>Поколение" . $i . "</b><br>";
-		$population2=array();
-		for ($j=0; $j < 70000 ; $j++) { 
-				$n1=rand(0,count($population)-1);
-				$n2=rand(0,count($population)-1);
-				$child=array_values(crossingover($population[$n1],$population[$n2],$length));
-			if ((chr_len($child) <= chr_len($population[$n1])) && (chr_len($child) <=  chr_len($population[$n2])) && ( count(array_unique($child)) == $length)){
-				$population2[]=$child;
-				print_r($child);
-				echo "<br>";
+	for ($q=0; $q <5 ; $q++) { 
+		for ($i=0; $i <1000 ; $i++) { 
+			$population[$i]=chromosome($length);
+		}
+		for ($i=0; $i <5 ; $i++) { 
+			$count=0;
+			echo "<b>Поколение" . $i . "</b><br>";
+			$population2=array();
+			for ($j=0; $j < 7000 ; $j++) { 
+					$n1=rand(0,count($population)-1);
+					$n2=rand(0,count($population)-1);
+					$child=array_values(crossingover($population[$n1],$population[$n2],$length));
+				if ((chr_len($child) <= chr_len($population[$n1])) && (chr_len($child) <=  chr_len($population[$n2])) && ( count(array_unique($child)) == $length)){
+					if (rand(1,10000)==42){
+						$child=mutation($child,$length);
+					}
+					$population2[$count]=$child;
+					$count+=1;
+					print_r($child);
+					echo "<br>";
+				}
+			}
+			if (!count($population2)){
+				break;
+			}
+			unset($population);
+			$population=array_values($population2);
+			unset($population2);
+			
+		}
+		$min=$population[0];
+		for ($i=1; $i <count($population) ; $i++) { 
+			if (chr_len($population[$i])<chr_len($min)){
+				$min=$population[$i];
 			}
 		}
-		if (!count($population2)){
-			break;
-		}
-		unset($population);
-		$population=array_values($population2);
-		unset($population2);
-		
+		echo "<b>Наикратчайший путь:</b> <br>";
+		print_r($min);
+		echo("<br><b>Его длина:</b> <br>");
+		echo chr_len($min);
+		unset($population);# code...
 	}
-	$min=$population[0];
-	for ($i=1; $i <count($population) ; $i++) { 
-		if (chr_len($population[$i])<chr_len($min)){
-			$min=$population[$i];
-		}
-	}
-	echo "<b>Наикратчайший путь:</b> <br>";
-	print_r($min);
-	echo("<br><b>Его длина:</b> <br>");
-	echo chr_len($min);
+	
+
 ?>
